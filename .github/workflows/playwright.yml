@@ -6,33 +6,7 @@ on:
     branches: [main, master]
 
 jobs:
-  # ── Job 1: Start the Vite frontend ──────────────────────────────────────────
-  start-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-
-      - name: Install frontend dependencies
-        run: npm ci
-        working-directory: ./
-
-      - name: Build frontend
-        run: npm run build
-        working-directory: ./
-
-      - name: Upload frontend build
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: dist/
-
-  # ── Job 2: Run Playwright tests against the frontend ────────────────────────
   test:
-    needs: start-frontend
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -42,23 +16,20 @@ jobs:
         with:
           node-version: lts/*
 
-      - name: Download frontend build
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: dist/
-
-      - name: Install frontend dependencies (for preview server)
+      # ── Frontend ─────────────────────────────────────────────────────────────
+      - name: Install frontend dependencies
         run: npm ci
-        working-directory: ./
+
+      - name: Build frontend
+        run: npm run build
 
       - name: Start frontend preview server
         run: npm run preview &
-        working-directory: ./
 
       - name: Wait for frontend to be ready
         run: npx wait-on http://localhost:4173 --timeout 60000
 
+      # ── Playwright ───────────────────────────────────────────────────────────
       - name: Install Playwright dependencies
         run: npm ci
         working-directory: ./Playwright
