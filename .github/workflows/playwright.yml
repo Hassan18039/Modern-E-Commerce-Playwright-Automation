@@ -6,7 +6,30 @@ on:
     branches: [main, master]
 
 jobs:
-  test:
+  # ── Job 1: TypeScript build check ───────────────────────────────────────────
+  build-check:
+    name: TypeScript Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: TypeScript compile check
+        run: npx tsc --noEmit
+
+      - name: Build frontend
+        run: npm run build
+
+  # ── Job 2: Cucumber E2E tests ────────────────────────────────────────────────
+  e2e-tests:
+    name: Cucumber E2E Tests
+    needs: build-check
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -16,7 +39,7 @@ jobs:
         with:
           node-version: lts/*
 
-      # ── Frontend ─────────────────────────────────────────────────────────────
+      # ── Frontend ──────────────────────────────────────────────────────────────
       - name: Install frontend dependencies
         run: npm ci
 
@@ -29,7 +52,7 @@ jobs:
       - name: Wait for frontend to be ready
         run: npx wait-on http://localhost:4173 --timeout 60000
 
-      # ── Playwright ───────────────────────────────────────────────────────────
+      # ── Playwright / Cucumber ─────────────────────────────────────────────────
       - name: Install Playwright dependencies
         run: npm ci
         working-directory: ./Playwright
@@ -38,15 +61,17 @@ jobs:
         run: npx playwright install --with-deps
         working-directory: ./Playwright
 
-      - name: Run Playwright tests
-        run: npx playwright test
+      - name: Run Cucumber E2E tests
+        run: npx cucumber-js --config cucumber.json
         working-directory: ./Playwright
         env:
-          BASE_URL: http://localhost:4173
+          CI: true
+          BASE_URL: http://localhost:5173
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Cucumber HTML report
+        uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
-          path: Playwright/playwright-report/
+          name: cucumber-report
+          path: Playwright/reports/
           retention-days: 30

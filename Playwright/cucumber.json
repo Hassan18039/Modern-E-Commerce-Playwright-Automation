@@ -1,14 +1,15 @@
 {
     "default": {
         "require": [
-            "steps/**/*.ts",
-            "fixtures/**/*.ts"
+            "Steps/**/*.ts",
+            "Fixtures/**/*.ts",
+            "Hooks/**/*.ts"
         ],
         "requireModule": [
             "ts-node/register"
         ],
         "paths": [
-            "features/**/*.feature"
+            "Features/**/*.feature"
         ],
         "format": [
             "progress",
