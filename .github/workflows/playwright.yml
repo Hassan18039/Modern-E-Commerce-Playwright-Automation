@@ -6,10 +6,10 @@ on:
     branches: [main, master]
 
 jobs:
-  # ── Job 1: Lint & TypeScript check ─────────────────────────────────────────
-  lint:
-    name: Lint & TypeScript Check
+  ci:
+    name: Lint, Build & Playwright BDD Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -18,78 +18,40 @@ jobs:
           node-version: lts/*
           cache: npm
 
-      - name: Install dependencies
+      # 1. Install frontend dependencies
+      - name: Install frontend dependencies
         run: npm ci
 
+      # 2. Lint & TypeScript check
       - name: TypeScript type check
         run: npm run type-check
 
       - name: ESLint
         run: npm run lint
 
-  # ── Job 2: Build ────────────────────────────────────────────────────────────
-  build:
-    name: Build
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
+      # 3. Build frontend
       - name: Build frontend
         run: npm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-          retention-days: 1
-
-  # ── Job 3: Cucumber E2E tests ───────────────────────────────────────────────
-  e2e-tests:
-    name: Playwright BDD Tests
-    needs: build
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: npm
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
+      # 4. Start preview server in background
       - name: Start frontend preview server
         run: npm run preview &
 
+      # 5. Wait for server to be ready
       - name: Wait for frontend to be ready
         run: npx wait-on http://localhost:4173 --timeout 60000
 
+      # 6. Install Playwright BDD dependencies
       - name: Install Playwright dependencies
         run: npm ci
         working-directory: ./Playwright
 
+      # 7. Install Playwright browsers
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
         working-directory: ./Playwright
 
+      # 8. Run all 30 BDD scenarios
       - name: Run Cucumber BDD tests
         run: npx cucumber-js --config cucumber.json
         working-directory: ./Playwright
@@ -97,6 +59,7 @@ jobs:
           CI: true
           BASE_URL: http://localhost:4173
 
+      # 9. Upload HTML report (always, even on failure)
       - name: Upload Cucumber HTML report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
