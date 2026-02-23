@@ -46,9 +46,24 @@ jobs:
         run: npm ci
         working-directory: ./Playwright
 
-      # 7. Install Playwright browsers
+      # 7. Cache Playwright browsers
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('Playwright/package-lock.json') }}
+
+      # 8. Install Playwright browsers (only if cache miss)
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
+        working-directory: ./Playwright
+
+      # Install system deps only (fast, always needed even with cache)
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
         working-directory: ./Playwright
 
       # 8. Run all 30 BDD scenarios
