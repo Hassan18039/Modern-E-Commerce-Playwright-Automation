@@ -63,14 +63,15 @@ export const Home: React.FC = () => {
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
-              <Typography variant="h2" component="h1" gutterBottom fontWeight="bold" sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' } }}>
+              <Typography data-testid="hero-heading" variant="h2" component="h1" gutterBottom fontWeight="bold" sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' } }}>
                 Welcome to ModernShop
               </Typography>
-              <Typography variant="h5" sx={{ mb: 4, opacity: 0.95, lineHeight: 1.6 }}>
+              <Typography data-testid="hero-subtitle" variant="h5" sx={{ mb: 4, opacity: 0.95, lineHeight: 1.6 }}>
                 Discover amazing products at unbeatable prices. Shop the latest trends in electronics, fashion, home, and sports.
               </Typography>
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Button
+                  data-testid="hero-shop-now-btn"
                   variant="contained"
                   size="large"
                   onClick={() => navigate('/products')}
@@ -91,6 +92,7 @@ export const Home: React.FC = () => {
                   Shop Now
                 </Button>
                 <Button
+                  data-testid="hero-browse-categories-btn"
                   variant="outlined"
                   size="large"
                   onClick={() => navigate('/products')}
@@ -129,7 +131,7 @@ export const Home: React.FC = () => {
 
       {/* Categories Section */}
       <Container maxWidth="lg" sx={{ mb: 8 }}>
-        <Typography variant="h3" align="center" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
+        <Typography data-testid="section-heading-categories" variant="h3" align="center" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
           Shop by Category
         </Typography>
         <Typography variant="h6" align="center" color="text.secondary" sx={{ mb: 5 }}>
@@ -150,7 +152,7 @@ export const Home: React.FC = () => {
                   },
                 }}
               >
-                <CardActionArea onClick={() => handleCategoryClick(category.name)} sx={{ height: '100%' }}>
+                <CardActionArea data-testid={`category-card-${category.name.toLowerCase()}`} onClick={() => handleCategoryClick(category.name)} sx={{ height: '100%' }}>
                   <CardMedia
                     component="img"
                     height="180"
@@ -176,10 +178,10 @@ export const Home: React.FC = () => {
       </Container>
 
       {/* Featured Products */}
-      <Container maxWidth="lg" sx={{ mb: 8 }}>
+      <Container maxWidth="lg" sx={{ mb: 8 }} data-testid="featured-products-section">
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Box>
-            <Typography variant="h3" gutterBottom fontWeight="bold">
+            <Typography data-testid="section-heading-featured" variant="h3" gutterBottom fontWeight="bold">
               Featured Products
             </Typography>
             <Typography variant="h6" color="text.secondary">
@@ -187,6 +189,7 @@ export const Home: React.FC = () => {
             </Typography>
           </Box>
           <Button
+            data-testid="view-all-products-btn"
             variant="outlined"
             size="large"
             onClick={() => navigate('/products')}
@@ -212,7 +215,7 @@ export const Home: React.FC = () => {
                 <Typography variant="h1" sx={{ mb: 2 }}>
                   🚚
                 </Typography>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography data-testid="feature-free-shipping" variant="h5" gutterBottom fontWeight="bold">
                   Free Shipping
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -225,7 +228,7 @@ export const Home: React.FC = () => {
                 <Typography variant="h1" sx={{ mb: 2 }}>
                   🔒
                 </Typography>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography data-testid="feature-secure-payment" variant="h5" gutterBottom fontWeight="bold">
                   Secure Payment
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -238,7 +241,7 @@ export const Home: React.FC = () => {
                 <Typography variant="h1" sx={{ mb: 2 }}>
                   💝
                 </Typography>
-                <Typography variant="h5" gutterBottom fontWeight="bold">
+                <Typography data-testid="feature-easy-returns" variant="h5" gutterBottom fontWeight="bold">
                   Easy Returns
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -253,13 +256,14 @@ export const Home: React.FC = () => {
       {/* Call to Action */}
       <Box sx={{ py: 8, textAlign: 'center' }}>
         <Container maxWidth="md">
-          <Typography variant="h3" gutterBottom fontWeight="bold">
+          <Typography data-testid="cta-heading" variant="h3" gutterBottom fontWeight="bold">
             Ready to Start Shopping?
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
             Browse our collection of premium products and find exactly what you need
           </Typography>
           <Button
+            data-testid="cta-explore-btn"
             variant="contained"
             size="large"
             onClick={() => navigate('/products')}
