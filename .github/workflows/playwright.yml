@@ -33,13 +33,13 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      # 4. Start preview server in background
-      - name: Start frontend preview server
-        run: npm run preview &
+      # 4. Start dev server in background
+      - name: Start frontend dev server
+        run: npm run dev &
 
       # 5. Wait for server to be ready
       - name: Wait for frontend to be ready
-        run: npx wait-on http://localhost:4173 --timeout 60000
+        run: npx wait-on http://localhost:5173 --timeout 60000
 
       # 6. Install Playwright BDD dependencies
       - name: Install Playwright dependencies
@@ -57,7 +57,7 @@ jobs:
         working-directory: ./Playwright
         env:
           CI: true
-          BASE_URL: http://localhost:4173
+          BASE_URL: http://localhost:5173
 
       # 9. Upload HTML report (always, even on failure)
       - name: Upload Cucumber HTML report
