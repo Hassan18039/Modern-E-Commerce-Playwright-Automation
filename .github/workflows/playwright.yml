@@ -80,7 +80,7 @@ jobs:
         run: npm run preview &
 
       - name: Wait for frontend to be ready
-        run: npx wait-on http://localhost:5173 --timeout 60000
+        run: npx wait-on http://localhost:4173 --timeout 60000
 
       - name: Install Playwright dependencies
         run: npm ci
