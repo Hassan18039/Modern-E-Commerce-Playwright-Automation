@@ -1,10 +1,24 @@
-import { Page, expect } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
 export class ProductPage {
     readonly page: Page;
+    readonly searchInput: Locator;
+    readonly productCards: Locator;
+    readonly resultsCount: Locator;
+    readonly noProductsMessage: Locator;
+    readonly clearSearchButton: Locator;
+    readonly clearSearchIcon: Locator;
+    readonly cartBadge: Locator;
 
     constructor(page: Page) {
         this.page = page;
+        this.searchInput = page.getByTestId('product-search-input').locator('input');
+        this.productCards = page.locator('[data-testid^="product-card-"]');
+        this.resultsCount = page.getByTestId('results-count');
+        this.noProductsMessage = page.getByText('No products found');
+        this.clearSearchButton = page.getByText('Clear search');
+        this.clearSearchIcon = page.locator('div[role="button"]').filter({ hasText: 'Clear search' }).locator('svg');
+        this.cartBadge = page.getByTestId('cart-badge');
     }
 
     async navigateToProductsPage() {
@@ -16,43 +30,35 @@ export class ProductPage {
     }
 
     async verifySearchInput() {
-        await expect(this.page.getByTestId('product-search-input')).toBeVisible();
+        await expect(this.searchInput).toBeVisible();
     }
 
     async verifyProductListVisible() {
-        // Assert that the container holding the specific product cards or at least one is visible
-        const productCards = this.page.locator('[data-testid^="product-card-"]');
-        await expect(productCards.first()).toBeVisible();
+        await expect(this.productCards.first()).toBeVisible();
     }
 
     async searchForProduct(term: string) {
-        const searchInput = this.page.getByTestId('product-search-input').locator('input');
-        await searchInput.fill(term);
+        await this.searchInput.fill(term);
     }
 
     async verifySearchInputValue(term: string) {
-        const searchInput = this.page.getByTestId('product-search-input').locator('input');
-        await expect(searchInput).toHaveValue(term);
+        await expect(this.searchInput).toHaveValue(term);
     }
 
     async verifyProductsMatchingQueryVisible(query: string) {
-        // Here we ensure the displayed product cards contain text related to the query
-        const productCards = this.page.locator('[data-testid^="product-card-"]');
-        const count = await productCards.count();
+        const count = await this.productCards.count();
         expect(count).toBeGreaterThan(0);
         
-        // Ensure at least the first one shows related content
-        const firstCardText = await productCards.first().textContent();
+        const firstCardText = await this.productCards.first().textContent();
         expect(firstCardText?.toLowerCase()).toContain(query.toLowerCase());
     }
 
     async verifyResultsCountVisible() {
-        await expect(this.page.getByTestId('results-count')).toBeVisible();
+        await expect(this.resultsCount).toBeVisible();
     }
 
     async verifyResultsCountUpdate() {
-        // Just verify it's there for now and possibly matching text dynamically later if needed.
-        await expect(this.page.getByTestId('results-count')).toBeVisible();
+        await expect(this.resultsCount).toBeVisible();
     }
 
     async clickCategoryChip(category: string) {
@@ -60,13 +66,12 @@ export class ProductPage {
     }
 
     async verifyCategorySelected(category: string) {
-        // Material UI chips apply "MuiChip-filledPrimary" class when selected vs "MuiChip-outlined"
         const chip = this.page.getByTestId(`category-chip-${category.toLowerCase()}`);
         await expect(chip).toHaveClass(/MuiChip-filledPrimary/);
     }
 
     async verifyOnlyCategoryProductsVisible(category: string) {
-        const chips = this.page.locator(`[data-testid^="product-card-"] .MuiChip-root`);
+        const chips = this.productCards.locator('.MuiChip-root');
         const count = await chips.count();
         for (let i = 0; i < count; i++) {
             await expect(chips.nth(i)).toHaveText(category);
@@ -78,29 +83,26 @@ export class ProductPage {
     }
 
     async verifyNoProductsMessageVisible() {
-        await expect(this.page.getByText('No products found')).toBeVisible();
+        await expect(this.noProductsMessage).toBeVisible();
     }
 
     async verifyClearSearchButtonVisible() {
-        await expect(this.page.getByText('Clear search')).toBeVisible();
+        await expect(this.clearSearchButton).toBeVisible();
     }
 
     async clickClearSearchButton() {
-        const clearChip = this.page.locator('div[role="button"]').filter({ hasText: 'Clear search' });
-        // The MUI Chip onDelete renders an SVG icon (usually CancelIcon or DeleteIcon)
-        await clearChip.locator('svg').click();
+        await this.clearSearchIcon.click();
         await this.page.waitForTimeout(500); 
     }
 
     async clickAddToCartOnFirstProduct() {
-        const addToCartButton = this.page.locator('[data-testid^="add-to-cart-"]').first();
+        const addToCartButton = this.productCards.first().locator('[data-testid^="add-to-cart-"]');
         await addToCartButton.click();
     }
 
     async verifyCartBadgeCountIncreased() {
-        const cartBadge = this.page.getByTestId('cart-badge');
-        await expect(cartBadge).toBeVisible();
-        const badgeText = await cartBadge.textContent();
+        await expect(this.cartBadge).toBeVisible();
+        const badgeText = await this.cartBadge.textContent();
         expect(Number(badgeText)).toBeGreaterThan(0);
     }
 }
