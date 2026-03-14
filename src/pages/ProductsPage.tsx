@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Box,
@@ -12,18 +12,14 @@ import {
 import { Search as SearchIcon } from '@mui/icons-material';
 import { useSearchParams } from 'react-router-dom';
 import { ProductGrid } from '../components/product/ProductGrid';
-import { mockProducts } from '../data/mockProducts';
 
 export const ProductsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
 
-  // Get unique categories from products
-  const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(mockProducts.map((p) => p.category)));
-    return ['All', ...uniqueCategories.sort()];
-  }, []);
+  const categories = ['All', 'Electronics', 'Fashion', 'Home', 'Sports'];
 
   // Initialize category from URL params
   useEffect(() => {
@@ -31,29 +27,33 @@ export const ProductsPage: React.FC = () => {
     if (categoryParam && categories.includes(categoryParam)) {
       setSelectedCategory(categoryParam);
     }
-  }, [searchParams, categories]);
+  }, [searchParams]);
 
-  // Filter products based on search and category
-  const filteredProducts = useMemo(() => {
-    let filtered = mockProducts;
-
-    // Filter by category
-    if (selectedCategory !== 'All') {
-      filtered = filtered.filter((product) => product.category === selectedCategory);
-    }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(query) ||
-          product.description.toLowerCase().includes(query) ||
-          product.category.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
+  // Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const queryParams = new URLSearchParams();
+        if (searchQuery) queryParams.append('search', searchQuery);
+        if (selectedCategory && selectedCategory !== 'All') queryParams.append('category', selectedCategory);
+        
+        const response = await fetch(`http://localhost:5000/api/products?${queryParams.toString()}`);
+        const data = await response.json();
+        
+        const mappedProducts = data.map((p: any) => ({
+          ...p,
+          image: p.imageUrl,
+          inStock: p.stock > 0,
+        }));
+        setFilteredProducts(mappedProducts);
+      } catch (error) {
+        console.error('Failed to fetch products', error);
+      }
+    };
+    
+    // Simple debounce for typing search queries
+    const timeoutId = setTimeout(() => fetchProducts(), 300);
+    return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedCategory]);
 
   const handleCategoryChange = (category: string) => {
@@ -77,7 +77,7 @@ export const ProductsPage: React.FC = () => {
           All Products
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          Browse our complete collection of {mockProducts.length} amazing products
+          Browse our complete collection of amazing products
         </Typography>
       </Box>
 

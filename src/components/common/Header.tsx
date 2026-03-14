@@ -12,14 +12,18 @@ import {
 import {
   ShoppingCart as ShoppingCartIcon,
   Store as StoreIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
+import { useThemeContext } from '../../context/ThemeContext';
 import { CartDrawer } from '../cart/CartDrawer';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useCart();
+  const { mode, toggleColorMode } = useThemeContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -52,6 +56,9 @@ export const Header: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1 }}>
+              <IconButton color="inherit" onClick={toggleColorMode}>
+                {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+              </IconButton>
               <IconButton
                 data-testid="cart-icon-button"
                 color="inherit"

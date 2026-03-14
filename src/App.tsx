@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, CssBaseline, Box } from '@mui/material';
-import { theme } from './theme/muiTheme';
+import { CssBaseline, Box } from '@mui/material';
+import { ThemeContextProvider } from './context/ThemeContext';
 import { CartProvider } from './context/CartContext';
 import { Header } from './components/common/Header';
 import { Footer } from './components/common/Footer';
@@ -13,7 +13,7 @@ import { OrderSuccessPage } from './pages/OrderSuccessPage';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeContextProvider>
       <CssBaseline />
       <CartProvider>
         <Router>
@@ -39,7 +39,7 @@ function App() {
           </Box>
         </Router>
       </CartProvider>
-    </ThemeProvider>
+    </ThemeContextProvider>
   );
 }
 
