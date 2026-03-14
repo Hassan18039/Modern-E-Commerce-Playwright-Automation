@@ -47,6 +47,62 @@ app.get('/api/products', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
+// Create a new product
+app.post('/api/products', async (req, res) => {
+  try {
+    const { name, description, price, imageUrl, category, stock } = req.body;
+    const newProduct = await prisma.product.create({
+      data: {
+        name,
+        description,
+        price: Number(price),
+        imageUrl,
+        category,
+        stock: Number(stock),
+      },
+    });
+    res.status(201).json(newProduct);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
+// Update a product
+app.put('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, price, imageUrl, category, stock } = req.body;
+    
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        price: price !== undefined ? Number(price) : undefined,
+        imageUrl,
+        category,
+        stock: stock !== undefined ? Number(stock) : undefined,
+      },
+    });
+    res.json(updatedProduct);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+// Delete a product
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.product.delete({ where: { id } });
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 
