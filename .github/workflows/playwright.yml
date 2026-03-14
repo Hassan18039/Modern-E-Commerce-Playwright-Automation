@@ -21,25 +21,31 @@ jobs:
       # 1. Install frontend dependencies
       - name: Install frontend dependencies
         run: npm ci
+        working-directory: ./Frontend
 
       # 2. Lint & TypeScript check
       - name: TypeScript type check
         run: npm run type-check
+        working-directory: ./Frontend
 
       - name: ESLint
         run: npm run lint
+        working-directory: ./Frontend
 
       # 3. Build frontend
       - name: Build frontend
         run: npm run build
+        working-directory: ./Frontend
 
       # 4. Start dev server in background
       - name: Start frontend dev server
         run: npm run dev &
+        working-directory: ./Frontend
 
       # 5. Wait for server to be ready
       - name: Wait for frontend to be ready
         run: npx wait-on http://localhost:5173 --timeout 60000
+        working-directory: ./Frontend
 
       # 6. Install Playwright BDD dependencies
       - name: Install Playwright dependencies
