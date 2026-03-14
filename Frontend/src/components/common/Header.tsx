@@ -53,6 +53,9 @@ export const Header: React.FC = () => {
               <Button data-testid="nav-products" color="inherit" onClick={() => navigate('/products')}>
                 Products
               </Button>
+              <Button data-testid="nav-admin" color="secondary" variant="outlined" sx={{ ml: 2, borderColor: 'rgba(255,255,255,0.5)', color: 'white' }} onClick={() => navigate('/admin/products')}>
+                Admin Panel
+              </Button>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1 }}>
