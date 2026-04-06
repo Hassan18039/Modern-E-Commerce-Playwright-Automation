@@ -11,6 +11,7 @@ import {
   Stack,
   Divider,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
 import {
   ShoppingCart as ShoppingCartIcon,
@@ -18,7 +19,6 @@ import {
   Remove as RemoveIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import { mockProducts } from '../data/mockProducts';
 import { useCart } from '../hooks/useCart';
 
 export const ProductDetailPage: React.FC = () => {
@@ -26,8 +26,46 @@ export const ProductDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const product = mockProducts.find((p) => p.id === id);
+  React.useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        if (!response.ok) {
+          setProduct(null);
+          return;
+        }
+        const data = await response.json();
+        
+        // Map backend product structure to match expected frontend structure
+        setProduct({
+          ...data,
+          image: data.imageUrl,
+          inStock: data.stock > 0,
+          // Add default static fields if they are not stored in db for details
+          rating: data.rating || 4.5,
+          reviewCount: data.reviewCount || 128,
+        });
+      } catch (error) {
+        console.error('Failed to fetch product details', error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8, display: 'flex', justifyContent: 'center', minHeight: '50vh', alignItems: 'center' }}>
+        <CircularProgress size={50} />
+      </Container>
+    );
+  }
 
   if (!product) {
     return (
@@ -108,7 +146,7 @@ export const ProductDetailPage: React.FC = () => {
                 Features:
               </Typography>
               <Stack spacing={1}>
-                {product.features.map((feature, index) => (
+                {product.features.map((feature: string, index: number) => (
                   <Typography key={index} variant="body2">
                     • {feature}
                   </Typography>

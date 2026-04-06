@@ -47,6 +47,27 @@ app.get('/api/products', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
+
+// Get a single product by ID
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+    
+    if (!product) {
+      res.status(404).json({ error: 'Product not found' });
+      return;
+    }
+    
+    res.json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
 // Create a new product
 app.post('/api/products', async (req, res) => {
   try {

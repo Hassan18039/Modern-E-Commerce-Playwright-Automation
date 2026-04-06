@@ -8,6 +8,7 @@ import {
   Stack,
   Typography,
   Paper,
+  CircularProgress,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { useSearchParams } from 'react-router-dom';
@@ -18,6 +19,7 @@ export const ProductsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const categories = ['All', 'Electronics', 'Fashion', 'Home', 'Sports'];
 
@@ -32,6 +34,7 @@ export const ProductsPage: React.FC = () => {
   // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
         const queryParams = new URLSearchParams();
         if (searchQuery) queryParams.append('search', searchQuery);
@@ -48,6 +51,8 @@ export const ProductsPage: React.FC = () => {
         setFilteredProducts(mappedProducts);
       } catch (error) {
         console.error('Failed to fetch products', error);
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -140,7 +145,11 @@ export const ProductsPage: React.FC = () => {
       </Box>
 
       {/* Products Grid */}
-      {filteredProducts.length > 0 ? (
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress size={50} />
+        </Box>
+      ) : filteredProducts.length > 0 ? (
         <ProductGrid products={filteredProducts} />
       ) : (
         <Paper sx={{ p: 8, textAlign: 'center' }}>
